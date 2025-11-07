@@ -367,7 +367,7 @@ body {
 
     /* Responsif */
 
-        @media (max-width: 939px) {
+    @media (max-width: 939px) {
       .main-menu-card {
         padding: 15px;
       }
@@ -1379,6 +1379,10 @@ a.btn-link {
 
   .swiper {
     width: 80%;
+  }
+
+  .post-img {
+    height: 400px;             /* tinggi gambar diseragamkan */
   }
 }
 
