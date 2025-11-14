@@ -531,7 +531,7 @@ body {
         .hyvor-wrapper {
         max-width: 800px;
         margin: 0 auto;
-        border: 1px solid #ddd;       /* Garis pinggir */
+        border: 1px solid #ff7ca3;       /* Garis pinggir */
         border-radius: 10px;          /* Sudut membulat */
         padding: 20px;                /* Ruang dalam */
         background: #fff;             /* Latar putih agar bersih */
