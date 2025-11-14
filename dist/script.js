@@ -68,7 +68,7 @@
 
 
 
-    // DETAIL PRODUK 
+    // POPUP DETAIL PRODUK 
     document.addEventListener("DOMContentLoaded", function () {
     const productModal = document.getElementById("productModal");
     const carouselInner = productModal.querySelector(".carousel-inner");
@@ -82,7 +82,7 @@
         const images = JSON.parse(this.dataset.images);
 
         document.getElementById("modalTitle").textContent = title;
-        document.getElementById("modalDesc").textContent = desc;
+        document.getElementById("modalDesc").innerHTML = desc;
         document.getElementById("modalOldPrice").textContent = oldPrice;
         document.getElementById("modalPrice").textContent = price;
 

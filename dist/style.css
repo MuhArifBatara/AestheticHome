@@ -360,10 +360,17 @@ body {
     #room .row,
     #indor .row,
     #aksesoris .row,
-    #kategori .row {
+    #kategori .row{
       max-width: 1540px; /* sama seperti container Bootstrap */
       margin: 0 auto;
     }
+
+    .disqus-container .container-xl {
+        max-width: 800px; /* sesuai grid produk */
+        
+    }
+
+
 
     /* Responsif */
 
@@ -400,7 +407,6 @@ body {
       transition: all 0.3s ease;
       border-radius: 15px;
       overflow: hidden; 
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     .card:hover {
       transform: translateY(-5px);
@@ -655,7 +661,7 @@ body {
       transform: translateY(0);
     }
 
-
+    
     /* ===== HILANGKAN LONJAKAN PUTIH SAAT SWIPE ===== */
 
     /* Styling tombol close di pojok kanan atas */
