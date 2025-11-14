@@ -238,35 +238,43 @@
     <!-- AKHIR DETAIL -->
 
       <!-- PENILAI PRODUK -->
-      <section class="py-5">
+      <!-- SIMPLE HYVOR DATA-API BASED COMMENTS (Bootstrap 5) -->
+        <section class="py-5">
           <div class="container">
-              <div class="row justify-content-center">
-                  <div class="col-lg-8 col-md-10 col-12">
+            <div class="row justify-content-center">
+              <div class="col-lg-8 col-md-10 col-12">
 
-                      <h3 class="category-title">Penilaian Produk</h3>
+                <h3 class="category-title mb-4">Penilaian Produk</h3>
 
-                      <script async src="https://talk.hyvor.com/embed/embed.js" type="module"></script>
+                <!-- Tempat kita render komentar singkat -->
+                <div id="short-comments"></div>
 
-                      <div class="hyvor-wrapper">
-                          <hyvor-talk-comments
-                              website-id="14504"
-                              id="hyvor-comments"
-                              comments-per-page="5"
-                          ></hyvor-talk-comments>
-                      </div>
+                <!-- Kontrol pagination custom -->
+                <div id="short-comments-nav" class="d-flex justify-content-between align-items-center mt-3">
+                  <button id="prev-btn" class="btn btn-sm btn-outline-primary" disabled>Prev</button>
+                  <div id="page-info" class="text-muted small"></div>
+                  <button id="next-btn" class="btn btn-sm btn-outline-primary" disabled>Next</button>
+                </div>
 
-                      <script>
-                          document.getElementById("hyvor-comments")
-                              .setAttribute("page-id", window.location.href);
-                      </script>
+                <!-- Tombol untuk memuat thread Hyvor penuh -->
+                <div class="mt-4 text-center">
+                  <button id="load-full-thread" class="btn btn-primary">Lihat semua komentar</button>
+                </div>
 
-                  </div>
+                <!-- Placeholder Hyvor (tidak auto-load) -->
+                <div id="hyvor-container" class="mt-3" style="display:none;">
+                  <script async src="https://talk.hyvor.com/embed/embed.js" type="module"></script>
+                  <hyvor-talk-comments
+                    website-id="14504"
+                    id="hyvor-comments"
+                    page-size=""
+                    ></hyvor-talk-comments>
+                </div>
+
               </div>
+            </div>
           </div>
-      </section>
-
-
-
+        </section>
       <!-- AKHIR PENILAIAN PRODUK -->
 
 
@@ -1246,7 +1254,137 @@
   </div>
   </footer>
 
-  
+  <script>
+(async function(){
+  const WEBSITE_ID = 14504;                // ganti jika perlu
+  const PER_PAGE = 5;                     // jumlah komentar per "halaman" yang kita mau
+  const shortContainer = document.getElementById('short-comments');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const pageInfo = document.getElementById('page-info');
+  const loadFull = document.getElementById('load-full-thread');
+  const hyvorContainer = document.getElementById('hyvor-container');
+
+  // gunakan URL halaman sebagai identifier
+  const pageIdentifier = window.location.href;
+
+  // helper: fetch page object to get numeric page_id
+  async function fetchPageId() {
+    const filter = encodeURIComponent(`identifier='${pageIdentifier}'`);
+    const url = `https://talk.hyvor.com/api/data/v1/pages?website_id=${WEBSITE_ID}&filter=${filter}&limit=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data.length) return data[0].id;
+    return null; // belum ada page (belum ada komentar)
+  }
+
+  // helper: fetch comments given page_id, offset, limit
+  async function fetchComments(page_id, offset = 0, limit = PER_PAGE) {
+    const url = `https://talk.hyvor.com/api/data/v1/comments?website_id=${WEBSITE_ID}&limit=${limit}&offset=${offset}&filter=${encodeURIComponent(`page_id=${page_id} & parent_id = null`)}`;
+    // note: parent_id=null filter may be used to only get top-level comments; sesuaikan bila mau semua
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
+  }
+
+  // ambil jumlah komentar (via pages endpoint)
+  async function fetchCommentsCount(pageIdentifier) {
+    const f = encodeURIComponent(`identifier='${pageIdentifier}'`);
+    const url = `https://talk.hyvor.com/api/data/v1/pages?website_id=${WEBSITE_ID}&filter=${f}&limit=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data.length) return data[0].comments_count || 0;
+    return 0;
+  }
+
+  // render list komentar (simple)
+  function renderComments(comments) {
+    if (!comments || comments.length === 0) {
+      shortContainer.innerHTML = '<p class="text-muted">Belum ada komentar.</p>';
+      return;
+    }
+    shortContainer.innerHTML = comments.map(c => {
+      const userName = c.user && c.user.name ? c.user.name : 'Guest';
+      const time = new Date(c.created_at * 1000).toLocaleString();
+      // gunakan body_html yang disediakan Hyvor (safe-ish). Jika khawatir XSS, parse dan sanitize.
+      return `
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <strong>${escapeHtml(userName)}</strong>
+              <small class="text-muted">${time}</small>
+            </div>
+            <div class="comment-body">${c.body_html}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // escape helper hanya untuk teks (body_html kita tampilkan apa adanya)
+  function escapeHtml(text){
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // --- pagination state ---
+  let page_id = await fetchPageId();
+  let totalComments = await fetchCommentsCount(pageIdentifier);
+  let currentOffset = 0;
+
+  // initial load
+  async function loadPage(offset) {
+    if (!page_id) {
+      // jika belum ada page di Hyvor (belum ada komentar sama sekali)
+      shortContainer.innerHTML = '<p class="text-muted">Belum ada komentar.</p>';
+      pageInfo.textContent = '';
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    const comments = await fetchComments(page_id, offset, PER_PAGE);
+    renderComments(comments);
+
+    // update nav
+    currentOffset = offset;
+    const currentPage = Math.floor(offset / PER_PAGE) + 1;
+    const totalPage = Math.max(1, Math.ceil(totalComments / PER_PAGE));
+    pageInfo.textContent = `Halaman ${currentPage} / ${totalPage}`;
+
+    prevBtn.disabled = offset === 0;
+    nextBtn.disabled = (offset + PER_PAGE) >= totalComments;
+  }
+
+  // tombol nav
+  prevBtn.addEventListener('click', () => {
+    if (currentOffset === 0) return;
+    loadPage(Math.max(0, currentOffset - PER_PAGE));
+  });
+  nextBtn.addEventListener('click', () => {
+    if ((currentOffset + PER_PAGE) >= totalComments) return;
+    loadPage(currentOffset + PER_PAGE);
+  });
+
+  // tombol untuk load full Hyvor thread
+  loadFull.addEventListener('click', () => {
+    // tampilkan container Hyvor dan set page-id untuk komponen (agar thread lengkap muncul)
+    hyvorContainer.style.display = 'block';
+    const hyvorEl = document.getElementById('hyvor-comments');
+    if (hyvorEl) hyvorEl.setAttribute('page-id', pageIdentifier);
+    // scroll ke komponen Hyvor
+    hyvorContainer.scrollIntoView({behavior: 'smooth'});
+  });
+
+  // jalankan initial
+  await loadPage(0);
+
+})();
+</script>
   <!-- Whatsapp Start -->
   <a href="https://wa.me/6287817945617?text=Assalamualaikum, Halo Naisha Mate,
       Saya tertarik dengan produk *Luma Voal Premium* nya.
