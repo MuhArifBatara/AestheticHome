@@ -238,20 +238,19 @@
     <!-- AKHIR DETAIL -->
 
       <!-- PENILAI PRODUK -->
-        <section>
-            <div id="hyvor-talk-view"></div>
+        <section id="penilaian-produk" class="container py-5">
 
-            <script type="text/javascript">
-                var HYVOR_TALK_WEBSITE = 14504; 
-                var HYVOR_TALK_CONFIG = {
-                    url: window.location.href,        // URL halaman
-                    id: window.location.pathname,     // ID unik halaman
-                    pageSize: 5                       // limit komentar
-                };
-            </script>
+              <h3>Penilaian Produk</h3>
 
-            <script async src="https://talk.hyvor.com/embed/embed.js"></script>
-        </section>
+              <script async src="https://talk.hyvor.com/embed/embed.js" type="module"></script>
+              <hyvor-talk-comments
+                  website-id="14504"
+                  page-id=""
+                  page-size="5"
+              ></hyvor-talk-comments>
+
+          </section>
+
 
       <!-- AKHIR PENILAIAN PRODUK -->
 
