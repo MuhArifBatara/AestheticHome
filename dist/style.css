@@ -365,11 +365,6 @@ body {
       margin: 0 auto;
     }
 
-        .hyvor-wrapper {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
 
 
 
@@ -530,6 +525,19 @@ body {
       padding: 8px 0;
     }
   }
+
+
+      /* Penilaian Produk */
+        .hyvor-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        border: 1px solid #ddd;       /* Garis pinggir */
+        border-radius: 10px;          /* Sudut membulat */
+        padding: 20px;                /* Ruang dalam */
+        background: #fff;             /* Latar putih agar bersih */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Bayangan halus */
+    }
+
 
 
 
