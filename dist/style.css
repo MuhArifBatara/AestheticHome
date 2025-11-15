@@ -749,6 +749,24 @@ body {
           transform: scale(1.1);
         }
 
+        /* Hilangkan background */
+        .carousel-control-prev,
+        .carousel-control-next {
+          background: none !important;
+        }
+
+        /* Ubah warna icon jadi pink */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+          filter: invert(48%) sepia(93%) saturate(500%) hue-rotate(300deg) brightness(100%) contrast(90%);
+        }
+
+        /* Opsional: hover sedikit lebih terang */
+        .carousel-control-prev:hover .carousel-control-prev-icon,
+        .carousel-control-next:hover .carousel-control-next-icon {
+          filter: invert(60%) sepia(95%) saturate(900%) hue-rotate(300deg) brightness(120%) contrast(95%);
+        }
+
 
       /* ===== Responsif agar bisa scroll di HP ===== */
         @media (max-width: 768px) {
@@ -1070,31 +1088,69 @@ a.btn-link {
 }
 
 /* Volume Container */
+
+/* Container volume: slider kiri, icon kanan */
 .volume-container {
   position: relative;
   display: flex;
   align-items: center;
+  gap: 5px; /* jarak kecil */
 }
-#volumeIcon {
-  position: relative;
-  z-index: 5;
-}
-#volumeControl {
-  position: absolute;
-  left: -80px;
-  bottom: 5px;
+
+/* SLIDER DI SEBELAH KIRI ICON */
+.volumeControl {
   width: 70px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  height: 3px;
+  appearance: none;
   cursor: pointer;
-   accent-color: #f06292;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
-.volume-container:hover #volumeControl {
+
+/* Saat hover container → slider muncul */
+.volume-container:hover .volumeControl {
   opacity: 1;
+  pointer-events: auto;
 }
-#volumeControl::-webkit-slider-thumb {
-  background: #ff7fab !important;
+
+/* VOLUME ICON DI KANAN */
+.volumeIcon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #ccc;   /* icon warna pink */
+  cursor: pointer;
 }
+
+/* Track slider */
+.volumeControl::-webkit-slider-runnable-track {
+  height: 4px;
+  background: #ff4da6; /* pink muda */
+  border-radius: 10px;
+}
+
+/* Thumb slider */
+.volumeControl::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #ff4da6; /* pink tua */
+  border-radius: 50%;
+  margin-top: -4px;
+}
+
+/* Firefox support */
+.volumeControl::-moz-range-track {
+  background: #ffb3d6;
+}
+.volumeControl::-moz-range-thumb {
+  background: #ff4da6;
+  border: none;
+}
+
+
+
 
 /* Fullscreen mode */
 .fullscreen video {

@@ -353,74 +353,85 @@
 
 
 // ==== SKRIP VIDEO ==== // 
-const video = document.getElementById("myVideo");
-const playBtn = document.getElementById("playBtn");
-const playPauseBtn = document.getElementById("playPauseBtn");
-const volumeIcon = document.getElementById("volumeIcon");
-const volumeControl = document.getElementById("volumeControl");
-const fullscreenBtn = document.getElementById("fullscreenBtn");
-const timeDisplay = document.getElementById("timeDisplay");
-const wrapper = document.querySelector(".video-wrapper");
+document.querySelectorAll(".video-wrapper").forEach(wrapper => {
+  
+  // Mendeteksi video: myVideo, myVideo2, atau <video> apapun
+  const video = wrapper.querySelector(".myVideo") 
+              || wrapper.querySelector("#myVideo2") 
+              || wrapper.querySelector("video");
+  const playBtn = wrapper.querySelector(".playBtn");
+  const playPauseBtn = wrapper.querySelector(".playPauseBtn");
+  const volumeIcon = wrapper.querySelector(".volumeIcon");
+  const volumeControl = wrapper.querySelector(".volumeControl");
+  const fullscreenBtn = wrapper.querySelector(".fullscreenBtn");
+  const timeDisplay = wrapper.querySelector(".timeDisplay");
+  // Format waktu
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? "0" + secs : secs}`;
+  }
 
-// Format waktu
-function formatTime(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${minutes}:${secs < 10 ? "0" + secs : secs}`;
-}
+  // Update durasi
+  video.addEventListener("timeupdate", () => {
+    timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+  });
+  video.addEventListener("loadedmetadata", () => {
+    timeDisplay.textContent = `0:00 / ${formatTime(video.duration)}`;
+  });
 
-// Update durasi
-video.addEventListener("timeupdate", () => {
-  timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-});
-video.addEventListener("loadedmetadata", () => {
-  timeDisplay.textContent = `0:00 / ${formatTime(video.duration)}`;
-});
+  // Play/Pause toggle
+  function togglePlay() {
+    if (video.paused) {
+      video.play();
+      playBtn.style.display = "none";
+      playPauseBtn.innerHTML = "❚❚";
+    } else {
+      video.pause();
+      playBtn.style.display = "block";
+      playPauseBtn.innerHTML = "&#9658;";
+    }
+  }
 
-// Play/Pause toggle
-function togglePlay() {
-  if (video.paused) {
-    video.play();
-    playBtn.style.display = "none";
-    playPauseBtn.innerHTML = "❚❚";
-  } else {
-    video.pause();
-    playBtn.style.display = "block";
+  playBtn.addEventListener("click", togglePlay);
+  playPauseBtn.addEventListener("click", togglePlay);
+  video.addEventListener("click", togglePlay);
+
+  video.addEventListener("ended", () => {
     playPauseBtn.innerHTML = "&#9658;";
-  }
-}
-playBtn.addEventListener("click", togglePlay);
-playPauseBtn.addEventListener("click", togglePlay);
-video.addEventListener("click", togglePlay);
-video.addEventListener("ended", () => {
-  playPauseBtn.innerHTML = "&#9658;";
-  playBtn.style.display = "block";
-});
+    playBtn.style.display = "block";
+  });
 
-// Volume
-volumeControl.addEventListener("input", () => {
-  video.volume = volumeControl.value;
-  updateVolumeIcon();
-});
-function updateVolumeIcon() {
-  if (video.volume === 0) volumeIcon.textContent = "🔇";
-  else if (video.volume < 0.5) volumeIcon.textContent = "🔉";
-  else volumeIcon.textContent = "🔊";
-}
+  // Volume
+  volumeControl.addEventListener("input", () => {
+    video.volume = volumeControl.value;
+    updateVolumeIcon();
+  });
 
-// Fullscreen
-fullscreenBtn.addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    wrapper.requestFullscreen();
-  } else {
-    document.exitFullscreen();
+  function updateVolumeIcon() {
+    if (video.volume === 0) volumeIcon.textContent = "🔇";
+    else if (video.volume < 0.5) volumeIcon.textContent = "🔉";
+    else volumeIcon.textContent = "🔊";
   }
-});
-document.addEventListener("fullscreenchange", () => {
-  if (document.fullscreenElement) {
-    wrapper.classList.add("fullscreen");
-  } else {
-    wrapper.classList.remove("fullscreen");
-  }
+
+  
+
+  // Fullscreen
+  fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      wrapper.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement === wrapper) {
+      wrapper.classList.add("fullscreen");
+    } else {
+      wrapper.classList.remove("fullscreen");
+    }
+  });
+
 });
 
